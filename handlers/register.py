@@ -7,7 +7,7 @@ from keyboards.default import yes_no_menu, main_menu
 from keyboards.inline import ikb_yes_no
 from loader import dp
 from states import register
-from utils.db_executor import add_new_user
+from db_executor import add_new_user
 
 
 @dp.message_handler(IsNotRegistered(), text="Давай!")

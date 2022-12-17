@@ -1,6 +1,6 @@
 from aiogram import types
 from aiogram.dispatcher.filters import BoundFilter
-from utils.db_executor import select_user
+from db_executor import select_user
 
 
 class IsNotRegistered(BoundFilter):

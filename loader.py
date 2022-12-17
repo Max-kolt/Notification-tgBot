@@ -16,9 +16,7 @@ dp = Dispatcher(bot, storage=storage)
 
 
 try:
-    # подключение к базе данных
     connect = sqlite3.connect(f"{database}")
-    # создание курсора
     sql = connect.cursor()
 except Exception as ex:
     print(ex)

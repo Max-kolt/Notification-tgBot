@@ -2,7 +2,7 @@ import sqlite3
 import time
 
 from config import database
-from loader import sql
+from loader import sql, connect
 
 
 def select_user(user_id: int):
@@ -56,6 +56,7 @@ def add_new_user(_id: int, name: str, city: str,
     except Exception as err:
         print(err)
         print("Не удалось добавить нового юзера")
+        return
 
 
 def test_db():
@@ -73,13 +74,6 @@ def test_db():
 
 
 if __name__ == "__main__":
-
-    try:
-        connect = sqlite3.connect(f"../{database}")
-        sql = connect.cursor()
-    except Exception as ex:
-        print(ex)
-        print("Не получилось подключиться к базе данных")
 
     # test_db()
     # delete_user(505135286)
@@ -111,4 +105,3 @@ if __name__ == "__main__":
                 "FOREIGN KEY (User) REFERENCES User(ID)" +
                 ");")
     '''
-
