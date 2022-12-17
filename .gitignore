@@ -3,3 +3,4 @@ stud
 config.py
 .idea
 __pycache__
+bot_db.db
