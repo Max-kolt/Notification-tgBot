@@ -7,36 +7,64 @@ from loader import sql, connect
 
 def select_user(user_id: int):
     select = sql.execute(f'''SELECT * FROM User
-                         WHERE ID = {user_id}; 
-                         ''')
+    WHERE ID = {user_id}; ''')
     return select.fetchone() is not None
 
 
 def select_user_info(user_id: int):
-    select = sql.execute(f'''SELECT * FROM User
-                         WHERE ID = {user_id}; 
-                         ''')
+    select = sql.execute(f'''SELECT Name, City, 
+    Weather_notify, Time_weather_notify, Analytics FROM User
+    WHERE ID = {user_id}; ''')
     return select.fetchone()
 
 
 def delete_user(user_id: int):
     sql.execute(f'''DELETE FROM User
-                WHERE ID = {user_id};
-                ''')
+    WHERE ID = {user_id};''')
     connect.commit()
     return True
 
 
 def delete_note(note_id: int):
     sql.execute(f'''DELETE FROM Notes
-                    WHERE ID = {note_id};
-                    ''')
+    WHERE ID = {note_id};''')
     connect.commit()
     return True
 
 
-def update(table: str, what_updates: list, where: str):
-    pass
+def update_name(user_id: int, new_name: str):
+    sql.execute(f'''UPDATE User
+    SET Name = "{new_name}"
+    WHERE ID = {user_id};''')
+    connect.commit()
+
+
+def update_city(user_id: int, new_city: str):
+    sql.execute(f'''UPDATE User
+    SET City = {new_city}
+    WHERE ID = {user_id};''')
+    connect.commit()
+
+
+def update_weather_notify(user_id: int, notify: bool):
+    sql.execute(f'''UPDATE User
+    SET Weather_notify = {notify}
+    WHERE ID = {user_id};''')
+    connect.commit()
+
+
+def update_time_weather_notify(user_id: int, new_time: str):
+    sql.execute(f'''UPDATE User
+    SET Time_weather_notify = "{new_time}"
+    WHERE ID = {user_id};''')
+    connect.commit()
+
+
+def update_analytics(user_id: int, anality: bool):
+    sql.execute(f'''UPDATE User
+    SET Analytics = {anality}
+    WHERE ID = {user_id};''')
+    connect.commit()
 
 
 def add_new_note():
@@ -48,10 +76,9 @@ def add_new_user(_id: int, name: str, city: str,
                  analytics: bool):
     try:
         sql.execute(f'''INSERT INTO User (ID, Name, Date_of_starting, City, 
-                    Weather_notify, Time_weather_notify, Analytics) VALUES
-                    ({_id}, "{name}", "{time.strftime("%Y-%m-%d")}", "{city}",
-                    {weather_notify}, "{time_weather_notify}", {analytics});
-                    ''')
+        Weather_notify, Time_weather_notify, Analytics) VALUES
+        ({_id}, "{name}", "{time.strftime("%Y-%m-%d")}", "{city}",
+        {weather_notify}, "{time_weather_notify}", {analytics});''')
         connect.commit()
     except Exception as err:
         print(err)
@@ -59,23 +86,8 @@ def add_new_user(_id: int, name: str, city: str,
         return
 
 
-def test_db():
-    sql.execute('''insert into User (ID, Name, Date_of_starting, City, 
-                    Weather_notify, Time_weather_notify, Analytics)
-                VALUES  (3, "Kot", "1999-12-12", "Питер", True, "08:00", True),
-                        (4, "Dog", "2023-12-20", "Москва", True, "12:00", False);
-                ''')
-    connect.commit()
-    select_result = select_user(3)
-    print(f"select {select_result}")
-    print(sql.execute('select * from User').fetchall())
-    delete_user(3)
-    delete_user(4)
-
-
 if __name__ == "__main__":
 
-    # test_db()
     # delete_user(505135286)
     result = sql.execute('''select * from User;''')
 
