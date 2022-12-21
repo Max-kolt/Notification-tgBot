@@ -65,13 +65,6 @@ async def analitycs(message: types.Message, state: FSMContext):
     await register.analytics.set()
 
 
-@dp.message_handler(IsNotRegistered(), state=register.time_weather_notify)
-async def time_weather_again(message: types.Message, state: FSMContext):
-    await message.answer("Ты допустил ошибку. Попробуй еще раз!\n"
-                         "Формат: hh:mm (например, 09:30)")
-    await register.time_weather_notify.set()
-
-
 @dp.callback_query_handler(IsNotRegistered(), text='Yes', state=register.analytics)
 async def last_state(call: CallbackQuery, state: FSMContext):
     await state.update_data(analytics=True)
@@ -86,13 +79,20 @@ async def last_state(call: CallbackQuery, state: FSMContext):
 
 async def register_new_user(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    add_new_user(_id=call.from_user.id,
-                 name=data.get('name'),
-                 city=data.get('city'),
-                 weather_notify=data.get('weather_notify'),
-                 time_weather_notify=data.get('time_weather_notify'),
-                 analytics=data.get('analytics'))
+    try:
+        add_new_user(_id=call.from_user.id,
+                     name=data.get('name'),
+                     city=data.get('city'),
+                     weather_notify=data.get('weather_notify'),
+                     time_weather_notify=data.get('time_weather_notify'),
+                     analytics=data.get('analytics'))
+    except Exception as error:
+        print(error, "\n не удалось создать пользователя")
+        await call.message.answer("Что-то пошло не так... Попробуйте еще раз")
+        await state.finish()
+        return
 
+    await state.finish()
     await call.message.answer(f"Спасибо, {data.get('name')}!\n"
                               f"Ты живешь в {data.get('city')}.\n"
                               f"Оповещение о погоде: {data.get('weather_notify')} "
@@ -101,4 +101,3 @@ async def register_new_user(call: CallbackQuery, state: FSMContext):
                               f"\n\n"
                               f"Теперь я полностью готов к работе😼",
                               reply_markup=main_menu)
-    await state.finish()

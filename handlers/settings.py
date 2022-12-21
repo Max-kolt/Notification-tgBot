@@ -1,7 +1,15 @@
+from keyboards.default import main_menu
 from loader import dp
-from aiogram import types
 from filters import IsRegistered
 from db_executor import select_user_info
+from db_executor import update_city, update_name, \
+    update_analytics, update_weather_notify, \
+    update_time_weather_notify, select_time_wn, \
+    select_analytics, select_weather_notify
+from states import register
+from aiogram import types
+from aiogram.types import ReplyKeyboardRemove, CallbackQuery
+from aiogram.dispatcher import FSMContext
 
 
 @dp.message_handler(IsRegistered(), commands=['settings'])
@@ -14,4 +22,73 @@ async def give_settings(message: types.Message):
                          f'Оповещение о погоде: {user[2]}\n /change_weatify\n\n'
                          f'Время оповещения о погоде: {user[3]}\n /change_time_wn\n\n'
                          f'Составление аналитики: {user[4]}\n /change_analytics\n\n')
+
+
+# _______________ Change name _______________
+@dp.message_handler(IsRegistered(), commands=['change_name'])
+async def name_question(message: types.Message):
+    await message.answer("Напиши свое новое имя", reply_markup=ReplyKeyboardRemove())
+    await register.name.set()
+
+
+@dp.message_handler(IsRegistered(), state=register.name)
+async def change_name(message: types.Message, state: FSMContext):
+    update_name(message.from_user.id, message.text)
+    await message.answer(f"Имя успешно изменено на <b>{message.text}</b>", reply_markup=main_menu)
+    await state.finish()
+
+
+# _______________ Change city _______________
+@dp.message_handler(IsRegistered(), commands=['change_city'])
+async def city_question(message: types.Message):
+    await message.answer("Напиши новый город", reply_markup=ReplyKeyboardRemove())
+    await register.city.set()
+
+
+@dp.message_handler(IsRegistered(), state=register.city)
+async def change_city(message: types.Message, state: FSMContext):
+    update_city(message.from_user.id, message.text)
+    await message.answer(f"Город успешно изменен на <b>{message.text}</b>", reply_markup=main_menu)
+    await state.finish()
+
+
+# _______________ Change weather notify_______________
+@dp.message_handler(IsRegistered(), commands=['change_weatify'])
+async def change_weather_notify(message: types.Message):
+    user_id = message.from_user.id
+    if select_weather_notify(user_id):
+        update_weather_notify(user_id, False)
+        await message.answer(f"Оповещение о прогнозе погоды <b>отключено</b>")
+    else:
+        update_weather_notify(user_id, True)
+        await message.answer(f"Оповещение о прогнозе погоды <b>включено</b>")
+        if not select_time_wn(user_id):
+            await message.answer(f'В какое время тебя оповещать?', reply_markup=ReplyKeyboardRemove())
+            await register.time_weather_notify.set()
+
+
+# _______________ Change time weather notify_______________
+@dp.message_handler(IsRegistered(), commands=['change_time_wn'])
+async def time_weather_notify_question(message: types.Message):
+    await message.answer("Введи новое время", reply_markup=ReplyKeyboardRemove())
+    await register.time_weather_notify.set()
+
+
+@dp.message_handler(IsRegistered(), state=register.time_weather_notify, regexp=r"\d\d[-:]\d\d")
+async def change_time_weather_notify(message: types.Message, state: FSMContext):
+    update_time_weather_notify(message.from_user.id, message.text)
+    await message.answer(f"Время успешно изменено на <b>{message.text}</b>", reply_markup=main_menu)
+    await state.finish()
+
+
+# _______________ Change analytics_______________
+@dp.message_handler(IsRegistered(), commands=['change_analytics'])
+async def analytics_question(message: types.Message):
+    user_id = message.from_user.id
+    if select_analytics(user_id):
+        update_analytics(user_id, False)
+        await message.answer("Аналитика <b>отключена</b>")
+    else:
+        update_analytics(user_id, True)
+        await message.answer("Аналитика <b>включена</b>")
 

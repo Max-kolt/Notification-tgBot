@@ -5,27 +5,45 @@ from config import database
 from loader import sql, connect
 
 
-def select_user(user_id: int):
+def select_user(user_id: int) -> bool:
     select = sql.execute(f'''SELECT * FROM User
     WHERE ID = {user_id}; ''')
     return select.fetchone() is not None
 
 
-def select_user_info(user_id: int):
+def select_user_info(user_id: int) -> tuple:
     select = sql.execute(f'''SELECT Name, City, 
     Weather_notify, Time_weather_notify, Analytics FROM User
     WHERE ID = {user_id}; ''')
     return select.fetchone()
 
 
-def delete_user(user_id: int):
+def select_time_wn(user_id: int) -> bool:
+    select = sql.execute(f'''SELECT Time_weather_notify FROM User
+    WHERE ID = {user_id}''')
+    return select.fetchone() is not None
+
+
+def select_weather_notify(user_id: int) -> bool:
+    select = sql.execute(f'''SELECT Weather_notify FROM User
+    WHERE ID = {user_id}''')
+    return select.fetchone()[0] == 1
+
+
+def select_analytics(user_id: int) -> bool:
+    select = sql.execute(f'''SELECT Analytics FROM User
+    WHERE ID = {user_id}''')
+    return select.fetchone()[0] == 1
+
+
+def delete_user(user_id: int) -> bool:
     sql.execute(f'''DELETE FROM User
     WHERE ID = {user_id};''')
     connect.commit()
     return True
 
 
-def delete_note(note_id: int):
+def delete_note(note_id: int) -> bool:
     sql.execute(f'''DELETE FROM Notes
     WHERE ID = {note_id};''')
     connect.commit()
@@ -33,38 +51,58 @@ def delete_note(note_id: int):
 
 
 def update_name(user_id: int, new_name: str):
-    sql.execute(f'''UPDATE User
-    SET Name = "{new_name}"
-    WHERE ID = {user_id};''')
-    connect.commit()
+    try:
+        sql.execute(f'''UPDATE User
+        SET Name = "{new_name}"
+        WHERE ID = {user_id};''')
+        connect.commit()
+    except Exception as error:
+        print(error, "\nНе удалось изменить имя")
+        raise error
 
 
 def update_city(user_id: int, new_city: str):
-    sql.execute(f'''UPDATE User
-    SET City = {new_city}
-    WHERE ID = {user_id};''')
-    connect.commit()
+    try:
+        sql.execute(f'''UPDATE User
+        SET City = "{new_city}"
+        WHERE ID = {user_id};''')
+        connect.commit()
+    except Exception as error:
+        print(error, "\nНе удалось изменить город")
+        raise error
 
 
 def update_weather_notify(user_id: int, notify: bool):
-    sql.execute(f'''UPDATE User
-    SET Weather_notify = {notify}
-    WHERE ID = {user_id};''')
-    connect.commit()
+    try:
+        sql.execute(f'''UPDATE User
+        SET Weather_notify = {notify}
+        WHERE ID = {user_id};''')
+        connect.commit()
+    except Exception as error:
+        print(error, "\nНе удалось изменить оповещение погоды")
+        raise error
 
 
 def update_time_weather_notify(user_id: int, new_time: str):
-    sql.execute(f'''UPDATE User
-    SET Time_weather_notify = "{new_time}"
-    WHERE ID = {user_id};''')
-    connect.commit()
+    try:
+        sql.execute(f'''UPDATE User
+        SET Time_weather_notify = "{new_time}"
+        WHERE ID = {user_id};''')
+        connect.commit()
+    except Exception as error:
+        print(error, "\nНе удалось изменить время оповещения")
+        raise error
 
 
 def update_analytics(user_id: int, anality: bool):
-    sql.execute(f'''UPDATE User
-    SET Analytics = {anality}
-    WHERE ID = {user_id};''')
-    connect.commit()
+    try:
+        sql.execute(f'''UPDATE User
+        SET Analytics = {anality}
+        WHERE ID = {user_id};''')
+        connect.commit()
+    except Exception as error:
+        print(error, "\nНе удалось изменить аналитику")
+        raise error
 
 
 def add_new_note():
@@ -80,10 +118,10 @@ def add_new_user(_id: int, name: str, city: str,
         ({_id}, "{name}", "{time.strftime("%Y-%m-%d")}", "{city}",
         {weather_notify}, "{time_weather_notify}", {analytics});''')
         connect.commit()
-    except Exception as err:
-        print(err)
+    except Exception as error:
+        print(error)
         print("Не удалось добавить нового юзера")
-        return
+        raise error
 
 
 if __name__ == "__main__":
@@ -92,6 +130,7 @@ if __name__ == "__main__":
     result = sql.execute('''select * from User;''')
 
     print(result.fetchall())
+    print(select_analytics(5682970744))
 
     '''
     # User table
