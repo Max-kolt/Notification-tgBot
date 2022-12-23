@@ -27,7 +27,7 @@ main_menu = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Настройки⚙"),
-            KeyboardButton(text="Оставить отзыв✏")
+            # KeyboardButton(text="Оставить отзыв✏")
         ]
     ],
     resize_keyboard=True

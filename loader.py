@@ -16,12 +16,8 @@ dp = Dispatcher(bot, storage=storage)
 # Создаем планировщик
 scheduler = AsyncIOScheduler()
 
-
-try:
-    connect = sqlite3.connect(f"{database}")
-    sql = connect.cursor()
-except Exception as ex:
-    print(ex)
-    print("Не получилось подключиться к базе данных")
+# Подключение к базе данных
+connect = sqlite3.connect(f"{database}")
+sql = connect.cursor()
 
 

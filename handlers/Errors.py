@@ -11,4 +11,3 @@ async def time_weather_again(message: types.Message, state: FSMContext):
                          "Формат: hh:mm (например, 09:30)")
 
 
-@dp.message_handler(IsNotRegistered())

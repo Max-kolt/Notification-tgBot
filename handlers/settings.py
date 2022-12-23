@@ -1,7 +1,7 @@
 from keyboards.default import main_menu
-from loader import dp
+from loader import dp, scheduler
 from filters import IsRegistered
-from db_executor import select_user_info
+from db_executor import get_user_info
 from db_executor import update_city, update_name, \
     update_analytics, update_weather_notify, \
     update_time_weather_notify, select_time_wn, \
@@ -10,12 +10,13 @@ from states import register
 from aiogram import types
 from aiogram.types import ReplyKeyboardRemove, CallbackQuery
 from aiogram.dispatcher import FSMContext
+from handlers.apsched import weather_notification
 
 
 @dp.message_handler(IsRegistered(), commands=['settings'])
 @dp.message_handler(IsRegistered(), text=['Настройки⚙', 'Настройки', 'настройки'])
 async def give_settings(message: types.Message):
-    user = select_user_info(message.from_user.id)
+    user = get_user_info(message.from_user.id)
     await message.answer(f'⚙Настройки⚙\nДля того чтобы изменить жми на команду\n\n'
                          f'Имя: {user[0]}\n/change_name\n\n'
                          f'Город: {user[1]}\n /change_city\n\n'
@@ -62,9 +63,18 @@ async def change_weather_notify(message: types.Message):
     else:
         update_weather_notify(user_id, True)
         await message.answer(f"Оповещение о прогнозе погоды <b>включено</b>")
-        if not select_time_wn(user_id):
-            await message.answer(f'В какое время тебя оповещать?', reply_markup=ReplyKeyboardRemove())
+        if select_time_wn(user_id):
+            await message.answer(f"Оповещение о прогнозе погоды <b>включено</b>\n"
+                                 f'В какое время тебя оповещать?', reply_markup=ReplyKeyboardRemove())
             await register.time_weather_notify.set()
+        else:
+            user_info = get_user_info(user_id)
+            time = user_info[3]
+            scheduler.add_job(weather_notification,
+                              hour=time[:2],
+                              minute=time[3:],
+                              args=(dp, user_id),
+                              id=str(user_id))
 
 
 # _______________ Change time weather notify_______________
@@ -76,8 +86,26 @@ async def time_weather_notify_question(message: types.Message):
 
 @dp.message_handler(IsRegistered(), state=register.time_weather_notify, regexp=r"\d\d[-:]\d\d")
 async def change_time_weather_notify(message: types.Message, state: FSMContext):
-    update_time_weather_notify(message.from_user.id, message.text)
+    user_id = message.from_user.id
+    time = message.text
+    update_time_weather_notify(message.from_user.id, time)
     await message.answer(f"Время успешно изменено на <b>{message.text}</b>", reply_markup=main_menu)
+    if scheduler.get_job(job_id=str(user_id)) is None:
+        scheduler.add_job(weather_notification,
+                          trigger='cron',
+                          hour=int(time[:2]),
+                          minute=int(time[3:]),
+                          args=(dp, user_id),
+                          id=str(user_id))
+    else:
+        scheduler.remove_job(str(user_id))
+        scheduler.add_job(weather_notification,
+                          trigger='cron',
+                          hour=int(time[:2]),
+                          minute=int(time[3:]),
+                          args=(dp, user_id),
+                          id=str(user_id))
+
     await state.finish()
 
 
@@ -91,4 +119,3 @@ async def analytics_question(message: types.Message):
     else:
         update_analytics(user_id, True)
         await message.answer("Аналитика <b>включена</b>")
-

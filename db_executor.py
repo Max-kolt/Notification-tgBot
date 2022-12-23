@@ -11,28 +11,34 @@ def select_user(user_id: int) -> bool:
     return select.fetchone() is not None
 
 
-def select_user_info(user_id: int) -> tuple:
+def get_user_info(user_id: int) -> tuple:
     select = sql.execute(f'''SELECT Name, City, 
     Weather_notify, Time_weather_notify, Analytics FROM User
     WHERE ID = {user_id}; ''')
     return select.fetchone()
 
 
+def get_all_weather_notify_users() -> list:
+    select = sql.execute('''SELECT ID FROM User
+    WHERE Weather_notify = 1;''')
+    return select.fetchall()
+
+
 def select_time_wn(user_id: int) -> bool:
     select = sql.execute(f'''SELECT Time_weather_notify FROM User
-    WHERE ID = {user_id}''')
+    WHERE ID = {user_id};''')
     return select.fetchone() is not None
 
 
 def select_weather_notify(user_id: int) -> bool:
     select = sql.execute(f'''SELECT Weather_notify FROM User
-    WHERE ID = {user_id}''')
+    WHERE ID = {user_id};''')
     return select.fetchone()[0] == 1
 
 
 def select_analytics(user_id: int) -> bool:
     select = sql.execute(f'''SELECT Analytics FROM User
-    WHERE ID = {user_id}''')
+    WHERE ID = {user_id};''')
     return select.fetchone()[0] == 1
 
 
@@ -125,12 +131,11 @@ def add_new_user(_id: int, name: str, city: str,
 
 
 if __name__ == "__main__":
-
     # delete_user(505135286)
+    # print(get_user_info(505135286))
     result = sql.execute('''select * from User;''')
-
     print(result.fetchall())
-    print(select_analytics(5682970744))
+    # print(get_all_weather_notify_users())
 
     '''
     # User table

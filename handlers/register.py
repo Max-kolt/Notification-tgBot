@@ -5,9 +5,10 @@ from aiogram.types import CallbackQuery, ReplyKeyboardRemove
 from filters import IsNotRegistered
 from keyboards.default import yes_no_menu, main_menu
 from keyboards.inline import ikb_yes_no
-from loader import dp, bot
+from loader import dp, scheduler
 from states import register
 from db_executor import add_new_user
+from handlers.apsched import weather_notification
 
 
 @dp.message_handler(IsNotRegistered(), text="Давай!")
@@ -79,8 +80,9 @@ async def last_state(call: CallbackQuery, state: FSMContext):
 
 async def register_new_user(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
+    user_id = call.from_user.id
     try:
-        add_new_user(_id=call.from_user.id,
+        add_new_user(_id=user_id,
                      name=data.get('name'),
                      city=data.get('city'),
                      weather_notify=data.get('weather_notify'),
@@ -101,3 +103,10 @@ async def register_new_user(call: CallbackQuery, state: FSMContext):
                               f"\n\n"
                               f"Теперь я полностью готов к работе😼",
                               reply_markup=main_menu)
+    if data.get('weather_notify'):
+        scheduler.add_job(weather_notification,
+                          trigger='cron',
+                          hour=int(data.get('time_weather_notify')[:2]),
+                          minute=int(data.get('time_weather_notify')[3:]),
+                          args=(dp, user_id),
+                          id=str(user_id))
