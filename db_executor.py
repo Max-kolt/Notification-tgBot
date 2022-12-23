@@ -24,6 +24,30 @@ def get_all_weather_notify_users() -> list:
     return select.fetchall()
 
 
+def get_last_user_note(user_id: int) -> tuple:
+    select = sql.execute(f'''SELECT ID, Description, Creation_date, Reminder_date, Reminder_time FROM Notes
+    WHERE User = {user_id}''')
+    return select.fetchall()[-1]
+
+
+def get_all_unperformed_notes() -> list:
+    select = sql.execute(f'''SELECT ID, Description, Creation_date, Reminder_date, Reminder_time FROM Notes
+    WHERE Performed = 0;''')
+    return select.fetchall()
+
+
+def get_user_by_noteid(note_id: int) -> int:
+    select = sql.execute(f'''SELECT User FROM Notes
+    WHERE ID = {note_id};''')
+    return select.fetchone()[0]
+
+
+def get_user_notes(user_id: int) -> list:
+    select = sql.execute(f'''SELECT ID, Description, Creation_date, Reminder_date, Reminder_time FROM Notes
+        WHERE User = {user_id} and Performed = 0;''')
+    return select.fetchall()
+
+
 def select_time_wn(user_id: int) -> bool:
     select = sql.execute(f'''SELECT Time_weather_notify FROM User
     WHERE ID = {user_id};''')
@@ -54,6 +78,17 @@ def delete_note(note_id: int) -> bool:
     WHERE ID = {note_id};''')
     connect.commit()
     return True
+
+
+def update_note_perform(note_id: int):
+    try:
+        sql.execute(f'''UPDATE Notes
+        SET Performed = 1
+        WHERE ID = {note_id}''')
+        connect.commit()
+    except Exception as error:
+        print(error, "\nНе удалось изменить perform")
+        raise error
 
 
 def update_name(user_id: int, new_name: str):
@@ -111,8 +146,13 @@ def update_analytics(user_id: int, anality: bool):
         raise error
 
 
-def add_new_note():
-    pass
+def add_new_note(user_id: int, description: str, date_nf: str, time_nf: str):
+    try:
+        sql.execute(f'''INSERT INTO Notes (User, Description, Creation_date, Reminder_date, Reminder_time) 
+        VALUES ({user_id}, "{description}", "{time.strftime("%Y-%m-%d")}", "{date_nf}", "{time_nf}");''')
+        connect.commit()
+    except Exception as error:
+        raise error
 
 
 def add_new_user(_id: int, name: str, city: str,
@@ -125,17 +165,17 @@ def add_new_user(_id: int, name: str, city: str,
         {weather_notify}, "{time_weather_notify}", {analytics});''')
         connect.commit()
     except Exception as error:
-        print(error)
-        print("Не удалось добавить нового юзера")
         raise error
 
 
 if __name__ == "__main__":
     # delete_user(505135286)
     # print(get_user_info(505135286))
-    result = sql.execute('''select * from User;''')
-    print(result.fetchall())
+    # result = sql.execute('''select * from User;''')
+    # print(result.fetchall())
     # print(get_all_weather_notify_users())
+    print(get_all_unperformed_notes())
+    print(get_user_by_noteid(6))
 
     '''
     # User table
@@ -151,13 +191,16 @@ if __name__ == "__main__":
                 
     
     # Notes table
+    sql.execute("DROP TABLE Notes;")
     sql.execute("CREATE TABLE Notes(" +
                 "ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "User INTEGER NOT NULL," +
                 "Description TEXT NOT NULL," +
                 "Creation_date DATE," +
-                "Reminder_datetime DATETIME,"
-                "Performed BOOLEAN NOT NULL DEFAULT 0 NOT NULL," +
+                "Reminder_date DATE," +
+                "Reminder_time VARCHAR(5),"+
+                "Performed BOOLEAN DEFAULT 0 NOT NULL," +
                 "FOREIGN KEY (User) REFERENCES User(ID)" +
                 ");")
+    print('Таблица Notes создана')
     '''

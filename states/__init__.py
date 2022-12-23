@@ -1,1 +1,1 @@
-from .user_states import register
+from .user_states import register, add_notes, note_notify

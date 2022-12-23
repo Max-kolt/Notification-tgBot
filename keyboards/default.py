@@ -22,13 +22,20 @@ yes_no_menu = ReplyKeyboardMarkup(
 main_menu = ReplyKeyboardMarkup(
     keyboard=[
         [
-            KeyboardButton(text="Создать новую запись📝"),
-            KeyboardButton(text="Созданные записи📚")
+            KeyboardButton(text="Создать новую\nзапись📝"),
+            # KeyboardButton(text="Созданные записи📚")
         ],
         [
             KeyboardButton(text="Настройки⚙"),
             # KeyboardButton(text="Оставить отзыв✏")
         ]
+    ],
+    resize_keyboard=True
+)
+
+cancel_menu = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Отмена❌")]
     ],
     resize_keyboard=True
 )

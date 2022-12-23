@@ -8,3 +8,12 @@ class register(StatesGroup):
     time_weather_notify = State()
     analytics = State()
 
+
+class add_notes(StatesGroup):
+    description = State()
+    date_notify = State()
+    time_notify = State()
+
+
+class note_notify(StatesGroup):
+    performed = State()
