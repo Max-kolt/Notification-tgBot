@@ -41,7 +41,8 @@ async def time_notify(message: types.Message, state: FSMContext):  # запис�
     await add_notes.time_notify.set()
 
 
-@dp.message_handler(IsRegistered(), state=add_notes.time_notify, regexp=r"\d\d[-:]\d\d")
+@dp.message_handler(IsRegistered(), state=add_notes.time_notify, regexp=r"(?<!\d)(?:[0-1][0-9]|2[0-3]):(?:[0-5]["
+                                                                        r"0-9])(?!\d)")
 async def last_state(message: types.Message, state: FSMContext):  # запись времени оповещения и сохранение в бд
     time = message.text
     user_id = message.from_user.id

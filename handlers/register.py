@@ -56,7 +56,8 @@ async def analitycs(call: CallbackQuery, state: FSMContext):
     await register.analytics.set()
 
 
-@dp.message_handler(IsNotRegistered(), state=register.time_weather_notify, regexp=r"\d\d[-:]\d\d")
+@dp.message_handler(IsNotRegistered(), state=register.time_weather_notify, regexp=r"(?<!\d)(?:[0-1][0-9]|2[0-3]):(?:["
+                                                                                  r"0-5][0-9])(?!\d)")
 async def analitycs(message: types.Message, state: FSMContext):
     time = message.text
     await state.update_data(time_weather_notify=time)

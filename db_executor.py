@@ -170,12 +170,13 @@ def add_new_user(_id: int, name: str, city: str,
 
 if __name__ == "__main__":
     # delete_user(505135286)
-    # print(get_user_info(505135286))
-    # result = sql.execute('''select * from User;''')
-    # print(result.fetchall())
+    update_time_weather_notify(786565087, "08:56")
+    result = sql.execute('''select * from User;''')
+    print(result.fetchall())
     # print(get_all_weather_notify_users())
-    print(get_all_unperformed_notes())
-    print(get_user_by_noteid(6))
+    # print(get_all_unperformed_notes())
+    # print(get_user_by_noteid(6))
+
 
     '''
     # User table
