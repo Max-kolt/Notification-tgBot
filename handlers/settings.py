@@ -4,13 +4,13 @@ from filters import IsRegistered
 from db_executor import get_user_info
 from db_executor import update_city, update_name, \
     update_analytics, update_weather_notify, \
-    update_time_weather_notify, select_time_wn, \
-    select_analytics, select_weather_notify
+    update_time_weather_notify, verify_time_wn, \
+    verify_analytics, verify_weather_notify
 from states import register
 from aiogram import types
-from aiogram.types import ReplyKeyboardRemove, CallbackQuery
+from aiogram.types import ReplyKeyboardRemove
 from aiogram.dispatcher import FSMContext
-from handlers.apsched import weather_notification
+from scheduler import weather_notification
 
 
 @dp.message_handler(IsRegistered(), commands=['settings'])
@@ -57,13 +57,13 @@ async def change_city(message: types.Message, state: FSMContext):
 @dp.message_handler(IsRegistered(), commands=['change_weatify'])
 async def change_weather_notify(message: types.Message):
     user_id = message.from_user.id
-    if select_weather_notify(user_id):
+    if verify_weather_notify(user_id):
         update_weather_notify(user_id, False)
         await message.answer(f"Оповещение о прогнозе погоды <b>отключено</b>")
     else:
         update_weather_notify(user_id, True)
         await message.answer(f"Оповещение о прогнозе погоды <b>включено</b>")
-        if select_time_wn(user_id):
+        if verify_time_wn(user_id):
             await message.answer(f"Оповещение о прогнозе погоды <b>включено</b>\n"
                                  f'В какое время тебя оповещать?', reply_markup=ReplyKeyboardRemove())
             await register.time_weather_notify.set()
@@ -84,7 +84,8 @@ async def time_weather_notify_question(message: types.Message):
     await register.time_weather_notify.set()
 
 
-@dp.message_handler(IsRegistered(), state=register.time_weather_notify, regexp=r"\d\d[-:]\d\d")
+@dp.message_handler(IsRegistered(), state=register.time_weather_notify, regexp=r"(?<!\d)(?:[0-1][0-9]|2[0-3]):(?:[0-5]["
+                                                                               r"0-9])(?!\d)")
 async def change_time_weather_notify(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     time = message.text
@@ -113,7 +114,7 @@ async def change_time_weather_notify(message: types.Message, state: FSMContext):
 @dp.message_handler(IsRegistered(), commands=['change_analytics'])
 async def analytics_question(message: types.Message):
     user_id = message.from_user.id
-    if select_analytics(user_id):
+    if verify_analytics(user_id):
         update_analytics(user_id, False)
         await message.answer("Аналитика <b>отключена</b>")
     else:

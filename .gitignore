@@ -3,3 +3,4 @@ config.py
 .idea
 __pycache__
 bot_db.db
+sqlite3.exe

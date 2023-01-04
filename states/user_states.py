@@ -15,5 +15,12 @@ class add_notes(StatesGroup):
     time_notify = State()
 
 
+class feedback(StatesGroup):
+    letter = State()
+    grade = State()
+
+
+'''
 class note_notify(StatesGroup):
     performed = State()
+'''

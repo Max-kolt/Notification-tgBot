@@ -1,5 +1,5 @@
 from db_executor import get_all_weather_notify_users, get_user_info, get_all_unperformed_notes, get_user_by_noteid
-from handlers.apsched import weather_notification, note_notification
+from scheduler import weather_notification, note_notification
 from loader import scheduler
 from datetime import datetime
 

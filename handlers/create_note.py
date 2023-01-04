@@ -1,5 +1,5 @@
 """  """
-from handlers.apsched import note_notification
+from scheduler import note_notification
 from loader import dp, scheduler
 from filters import IsRegistered
 from aiogram import types
@@ -67,4 +67,4 @@ async def last_state(message: types.Message, state: FSMContext):  # запись
                       id=str(note[0]))
 
     await message.answer(f"✅Создана запись:\n\n<b>{data['description']}</b>\n\n"
-                         f"(Оповещение {data['time']} 20{data['date']})", reply_markup=main_menu)
+                         f"(Оповещение {data['time']} {data['date']})", reply_markup=main_menu)

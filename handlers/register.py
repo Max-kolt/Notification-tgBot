@@ -3,12 +3,12 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, ReplyKeyboardRemove
 
 from filters import IsNotRegistered
-from keyboards.default import yes_no_menu, main_menu
+from keyboards.default import main_menu
 from keyboards.inline import ikb_yes_no
 from loader import dp, scheduler
 from states import register
 from db_executor import add_new_user
-from handlers.apsched import weather_notification
+from scheduler import weather_notification
 
 
 @dp.message_handler(IsNotRegistered(), text="Давай!")
