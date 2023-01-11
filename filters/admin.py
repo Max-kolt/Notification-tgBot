@@ -1,13 +1,13 @@
 from aiogram import types
 
 from aiogram.dispatcher.filters import BoundFilter
-from config import admins
+import os
 
 
 class IsAdmin(BoundFilter):
     async def check(self, message: types.Message):
-        for admin in admins:
-            if admin == message.from_user.id:
-                return True
+        admin = os.environ.get("ADMIN")
+        if admin == message.from_user.id:
+            return True
         return False
 

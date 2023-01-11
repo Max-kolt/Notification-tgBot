@@ -4,3 +4,4 @@ config.py
 __pycache__
 bot_db.db
 sqlite3.exe
+.env
